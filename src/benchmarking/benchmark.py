@@ -2,30 +2,93 @@ import subprocess
 import time
 import os
 
+
+# ----------- C -----------
 def benchmark_gcc(file_path):
     exe_file = "a.exe"
 
     # Compile
-    compile_process = subprocess.run(
-    ["gcc", file_path, "-std=c99", "-O2", "-o", exe_file],
-    capture_output=True,
-    text=True
-)
+    compile = subprocess.run(
+        ["gcc", file_path, "-o", exe_file],
+        capture_output=True,
+        text=True
+    )
 
-    # 🔴 Check if compile failed
-    if compile_process.returncode != 0:
-        print("Compilation Error:")
-        print(compile_process.stderr)
-        return None
+    if compile.returncode != 0:
+        return None, compile.stderr
 
-    # 🔴 Check if exe exists
-    if not os.path.exists(exe_file):
-        print("Executable not created")
-        return None
-
-    # Run and measure time
+    # Execute
     start = time.time()
-    subprocess.run([exe_file])
+    run = subprocess.run(
+        [exe_file],
+        capture_output=True,
+        text=True
+    )
     end = time.time()
 
-    return end - start
+    return end - start, run.stdout
+
+
+# ----------- C++ -----------
+def benchmark_cpp(file_path):
+    exe_file = "a.exe"
+
+    compile = subprocess.run(
+        ["g++", file_path, "-o", exe_file],
+        capture_output=True,
+        text=True
+    )
+
+    if compile.returncode != 0:
+        return None, compile.stderr
+
+    start = time.time()
+    run = subprocess.run(
+        [exe_file],
+        capture_output=True,
+        text=True
+    )
+    end = time.time()
+
+    return end - start, run.stdout
+
+
+# ----------- Java -----------
+def benchmark_java(file_path):
+    dir_path = os.path.dirname(file_path)
+    file_name = os.path.basename(file_path)
+    class_name = file_name.replace(".java", "")
+
+    # Compile
+    compile = subprocess.run(
+        ["javac", file_path],
+        capture_output=True,
+        text=True
+    )
+
+    if compile.returncode != 0:
+        return None, compile.stderr
+
+    # Run
+    start = time.time()
+    run = subprocess.run(
+        ["java", "-cp", dir_path, class_name],
+        capture_output=True,
+        text=True
+    )
+    end = time.time()
+
+    return end - start, run.stdout
+
+def benchmark_python(file_path):
+    import subprocess, time
+
+    start = time.time()
+    run = subprocess.run(
+        ["python", file_path],
+        capture_output=True,
+        text=True
+    )
+    end = time.time()
+
+    return end - start, run.stdout if run.returncode == 0 else run.stderr

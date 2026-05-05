@@ -1,3 +1,5 @@
+import re
+
 def detect_loops(code):
     loops = []
 
@@ -6,10 +8,25 @@ def detect_loops(code):
     for line in lines:
         line = line.strip()
 
-        if line.startswith("for"):
-            loops.append({"type": "for", "line": line})
+        # C / C++ / Java for loop
+        if re.match(r"for\s*\(.*\)", line):
+            loops.append({
+                "type": "for",
+                "line": line
+            })
 
-        elif line.startswith("while"):
-            loops.append({"type": "while", "line": line})
+        # while loop (all languages)
+        elif re.match(r"while\s*\(.*\)", line):
+            loops.append({
+                "type": "while",
+                "line": line
+            })
+
+        # Python for loop
+        elif re.match(r"for\s+.*in\s+.*:", line):
+            loops.append({
+                "type": "for",
+                "line": line
+            })
 
     return loops
